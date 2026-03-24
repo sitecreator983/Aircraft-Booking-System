@@ -1,0 +1,342 @@
+<div class="banner">
+  <div class="banner-inner">
+    <div class="left">
+      <button class="menuBtn" mat-icon-button [matMenuTriggerFor]="mainMenu" aria-label="Menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <mat-menu #mainMenu="matMenu">
+        <button mat-menu-item (click)="goHome()">
+          <mat-icon>home</mat-icon>
+          <span>Home</span>
+        </button>
+        <button mat-menu-item (click)="goFlights()">
+          <mat-icon>flight</mat-icon>
+          <span>Flights</span>
+        </button>
+        <button mat-menu-item (click)="goBookings()">
+          <mat-icon>receipt_long</mat-icon>
+          <span>Bookings</span>
+        </button>
+      </mat-menu>
+
+      <div class="title">Airplane Booking System</div>
+    </div>
+
+    <button class="logout" (click)="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <mat-card class="card">
+    <mat-card-title>Create Booking (All-in-one)</mat-card-title>
+    <mat-card-subtitle>
+      Passenger → Flight → Seat → Booking → (Optional) Baggage
+    </mat-card-subtitle>
+
+    <div class="loadingRow" *ngIf="loading">
+      <mat-progress-spinner mode="indeterminate" diameter="26"></mat-progress-spinner>
+      <span>Working...</span>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <mat-stepper linear #stepper>
+      <!-- STEP 1: Passenger -->
+      <mat-step [stepControl]="passengerForm">
+        <form [formGroup]="passengerForm">
+          <ng-template matStepLabel>Passenger</ng-template>
+
+          <div class="grid2">
+            <mat-form-field appearance="outline">
+              <mat-label>First name</mat-label>
+              <input matInput formControlName="firstName" />
+              <mat-error *ngIf="passengerForm.get('firstName')?.hasError('required')">Required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Last name</mat-label>
+              <input matInput formControlName="lastName" />
+              <mat-error *ngIf="passengerForm.get('lastName')?.hasError('required')">Required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Passport number</mat-label>
+              <input matInput formControlName="passportNumber" />
+              <mat-error *ngIf="passengerForm.get('passportNumber')?.hasError('required')">Required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" />
+              <mat-error *ngIf="passengerForm.get('email')?.hasError('required')">Required</mat-error>
+              <mat-error *ngIf="passengerForm.get('email')?.hasError('email')">Invalid email</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="actions">
+            <button mat-raised-button color="primary" matStepperNext [disabled]="passengerForm.invalid">Next</button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- STEP 2: Flight -->
+      <mat-step [stepControl]="flightForm">
+        <ng-template matStepLabel>Flight</ng-template>
+
+        <form [formGroup]="flightForm">
+          <mat-radio-group formControlName="mode" class="radioRow">
+            <mat-radio-button value="existing">Select existing</mat-radio-button>
+            <mat-radio-button value="create">Create new</mat-radio-button>
+          </mat-radio-group>
+
+          <div *ngIf="flightForm.value.mode === 'existing'">
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Flight</mat-label>
+              <mat-select formControlName="existingFlightNumber">
+                <mat-option *ngFor="let f of flights" [value]="f.flightNumber">
+                  {{ f.flightNumber }} — {{ f.companyName }} ({{ f.departureAirport }} → {{ f.arrivalAirport }})
+                </mat-option>
+              </mat-select>
+              <mat-hint>Optional for seat inventory: you can select seats by Aircraft without selecting a flight.</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <div *ngIf="flightForm.value.mode === 'create'" class="grid2">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Company</mat-label>
+                <mat-select formControlName="companyName">
+                  <mat-option [value]="''">-- Select company --</mat-option>
+                  <mat-option *ngFor="let c of companies" [value]="c">{{ c }}</mat-option>
+                </mat-select>
+                <mat-error *ngIf="flightForm.get('companyName')?.hasError('required')">Company is required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Flight digits (3)</mat-label>
+              <input matInput formControlName="flightDigits" placeholder="e.g. 123" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Aircraft</mat-label>
+              <mat-select formControlName="aircraftId" [disabled]="!flightForm.value.companyName">
+                <mat-option *ngFor="let a of filteredAircraft" [value]="a.aircraftID">
+                  #{{ a.aircraftID }} — {{ a.model }} ({{ a.baseAirport }})
+                </mat-option>
+              </mat-select>
+              <mat-hint *ngIf="!flightForm.value.companyName">Διάλεξε πρώτα εταιρία.</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Departure airport</mat-label>
+              <input matInput formControlName="departureAirport" placeholder="e.g. ATH" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Arrival airport</mat-label>
+              <mat-select formControlName="arrivalAirport">
+                <mat-option *ngFor="let a of airports" [value]="a.code">
+                  {{ a.display }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Departure date</mat-label>
+              <input matInput [matDatepicker]="depPicker" formControlName="departureDate" />
+              <mat-datepicker-toggle matSuffix [for]="depPicker"></mat-datepicker-toggle>
+              <mat-datepicker #depPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Departure time</mat-label>
+              <mat-select formControlName="departureTime">
+                <mat-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Arrival date</mat-label>
+              <input matInput [matDatepicker]="arrPicker" formControlName="arrivalDate" />
+              <mat-datepicker-toggle matSuffix [for]="arrPicker"></mat-datepicker-toggle>
+              <mat-datepicker #arrPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Arrival time</mat-label>
+              <mat-select formControlName="arrivalTime">
+                <mat-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="actions">
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-raised-button color="primary" (click)="goNextFromFlight(stepper)">Next</button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- STEP 3: Seat -->
+      <mat-step [stepControl]="seatForm">
+        <ng-template matStepLabel>Seat</ng-template>
+
+        <form [formGroup]="seatForm">
+          <mat-radio-group formControlName="mode" class="radioRow">
+            <mat-radio-button value="existing">Select existing</mat-radio-button>
+            <mat-radio-button value="create">Create new</mat-radio-button>
+          </mat-radio-group>
+
+          <div *ngIf="seatForm.value.mode === 'existing'">
+            <!-- Class -->
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Class</mat-label>
+              <mat-select formControlName="seatClassFilter">
+                <mat-option value="Economy">Economy</mat-option>
+                <mat-option value="Business">Business</mat-option>
+                <mat-option value="First">First</mat-option>
+                <mat-option value="PremiumEconomy">PremiumEconomy</mat-option>
+              </mat-select>
+              <mat-hint>Select class first, then seats load from Flight (if selected) or Aircraft (if selected).</mat-hint>
+            </mat-form-field>
+
+            <!-- Seat -->
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Seat</mat-label>
+              <mat-select
+                formControlName="existingSeatId"
+                [disabled]="!seatForm.value.seatClassFilter || (!flightForm.value.existingFlightNumber && !flightForm.value.aircraftId) || filteredSeats.length === 0"
+              >
+                <mat-option *ngFor="let s of filteredSeats" [value]="s.seatID">
+                  {{ s.seatNumber }} — {{ s.seatClass }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <p class="hint" *ngIf="!seatForm.value.seatClassFilter">
+              Διάλεξε πρώτα κλάση.
+            </p>
+            <p class="hint" *ngIf="seatForm.value.seatClassFilter && !flightForm.value.existingFlightNumber && !flightForm.value.aircraftId">
+              Διάλεξε Aircraft (στο Flight step → Create new) ή Flight (Select existing) για να φορτωθούν θέσεις.
+            </p>
+            <p class="hint" *ngIf="seatForm.value.seatClassFilter && (flightForm.value.existingFlightNumber || flightForm.value.aircraftId) && filteredSeats.length === 0">
+              Δεν υπάρχουν θέσεις για αυτή την κλάση.
+            </p>
+          </div>
+
+          <!-- CREATE seat (manual) -->
+          <div *ngIf="seatForm.value.mode === 'create'" class="grid2">
+            <mat-form-field appearance="outline">
+              <mat-label>Seat number</mat-label>
+              <input matInput formControlName="seatNumber" placeholder="e.g. 12A" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Seat class</mat-label>
+              <mat-select formControlName="seatClass">
+                <mat-option value="Economy">Economy</mat-option>
+                <mat-option value="Business">Business</mat-option>
+                <mat-option value="First">First</mat-option>
+                <mat-option value="PremiumEconomy">PremiumEconomy</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="actions">
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-raised-button color="primary" matStepperNext>Next</button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- ===================== STEP: PILOTS (NEW) ===================== -->
+      <mat-step [stepControl]="pilotForm">
+        <form [formGroup]="pilotForm">
+
+          <ng-template matStepLabel>Pilots</ng-template>
+
+            <div class="section">
+              <p>Select two available pilots (same airline as selected aircraft).</p>
+
+              <div class="row">
+                <!-- Pilot 1 -->
+                <mat-form-field appearance="outline" class="full">
+                  <mat-label>Pilot 1</mat-label>
+                    <mat-select formControlName="pilot1Id" (selectionChange)="onPilot1Change()">
+                      <mat-option *ngFor="let p of availablePilots" [value]="p.pilotID">
+                        {{p.firstName}} {{p.lastName}} (ID: {{p.pilotID}})
+                      </mat-option>
+                    </mat-select>
+                    <mat-hint *ngIf="pilotsLoading">Loading pilots...</mat-hint>
+                </mat-form-field>
+
+                <!-- Pilot 2 -->
+                <mat-form-field appearance="outline" class="full">
+                  <mat-label>Pilot 2</mat-label>
+                    <mat-select formControlName="pilot2Id">
+                      <mat-option *ngFor="let p of availablePilotsForPilot2" [value]="p.pilotID">
+                        {{p.firstName}} {{p.lastName}} (ID: {{p.pilotID}})
+                      </mat-option>
+                    </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="row">
+                <button mat-stroked-button matStepperPrevious type="button">Back</button>
+                <button mat-raised-button color="primary" matStepperNext type="button" [disabled]="pilotForm.invalid || samePilotSelected">Continue</button>
+              </div>
+
+              <mat-error *ngIf="samePilotSelected">
+                Pilot 1 and Pilot 2 cannot be the same.
+              </mat-error>
+
+            </div>
+        </form>
+      </mat-step>
+      <!-- ===================== END STEP: PILOTS ===================== -->
+
+      <!-- STEP 4: Confirm & Save -->
+      <mat-step>
+        <ng-template matStepLabel>Confirm & Save</ng-template>
+
+        <form [formGroup]="baggageForm">
+          <mat-card class="innerCard">
+            <mat-card-title>Optional baggage</mat-card-title>
+
+            <mat-radio-group
+              class="radioRow"
+              [value]="baggageForm.value.addBaggage ? 'yes' : 'no'"
+              (change)="baggageForm.patchValue({ addBaggage: $event.value === 'yes' })"
+            >
+              <mat-radio-button value="no">No baggage</mat-radio-button>
+              <mat-radio-button value="yes">Add baggage</mat-radio-button>
+            </mat-radio-group>
+
+            <div class="grid2" *ngIf="baggageForm.value.addBaggage">
+              <mat-form-field appearance="outline">
+                <mat-label>Weight (kg)</mat-label>
+                <input matInput type="number" formControlName="weightKg" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Type</mat-label>
+                <input matInput formControlName="baggageType" placeholder="e.g. Cabin / Checked" />
+              </mat-form-field>
+            </div>
+          </mat-card>
+
+          <div class="actions">
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-raised-button color="primary" (click)="submitAll()" [disabled]="loading">
+              Save to DB
+            </button>
+          </div>
+
+          <p class="success" *ngIf="createdBookingId">
+            ✅ Saved! BookingID: <b>{{ createdBookingId }}</b>
+          </p>
+        </form>
+      </mat-step>
+    </mat-stepper>
+  </mat-card>
+</div>

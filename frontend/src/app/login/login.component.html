@@ -1,0 +1,20 @@
+<div class="page">
+  <div class="card">
+    <h2>Login</h2>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label>Username</label>
+      <input type="text" formControlName="username" [disabled]="locked" />
+      <small class="err" *ngIf="isInvalid('username')">Το username είναι υποχρεωτικό.</small>
+
+      <label>Password</label>
+      <input type="text" formControlName="password" [disabled]="locked" />
+      <small class="err" *ngIf="isInvalid('password')">Το password είναι υποχρεωτικό.</small>
+
+      <button type="submit" [disabled]="locked || form.invalid">Sign in</button>
+    </form>
+
+    <p class="msg" *ngIf="message">{{ message }}</p>
+    <p class="tries" *ngIf="!locked && attempts > 0">Προσπάθειες: {{ attempts }}/3</p>
+  </div>
+</div>

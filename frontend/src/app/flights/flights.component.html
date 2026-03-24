@@ -1,0 +1,106 @@
+<div class="banner">
+  <div class="banner-inner">
+    <div class="left">
+      <button class="menuBtn" mat-icon-button [matMenuTriggerFor]="mainMenu" aria-label="Menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <mat-menu #mainMenu="matMenu">
+        <button mat-menu-item (click)="goHome()">
+          <mat-icon>home</mat-icon>
+          <span>Home</span>
+        </button>
+        <button mat-menu-item (click)="goFlights()">
+          <mat-icon>flight</mat-icon>
+          <span>Flights</span>
+        </button>
+        <button mat-menu-item (click)="goBookings()">
+          <mat-icon>event_note</mat-icon>
+          <span>Bookings</span>
+        </button>
+      </mat-menu>
+
+      <div class="title">Airplane Booking System</div>
+    </div>
+
+    <button class="logout" (click)="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <mat-card class="card">
+    <div class="headerRow">
+      <div>
+        <div class="hTitle">Flights</div>
+        <div class="hSub">All flights stored in the database. Filter by airline.</div>
+      </div>
+
+      <button mat-stroked-button (click)="refresh()" [disabled]="loading">
+        <mat-icon>refresh</mat-icon>
+        Refresh
+      </button>
+    </div>
+
+    <div class="loadingRow" *ngIf="loading">
+      <mat-progress-spinner mode="indeterminate" diameter="26"></mat-progress-spinner>
+      <span>Loading...</span>
+    </div>
+
+    <div class="error" *ngIf="error">{{ error }}</div>
+
+    <div class="filters">
+      <mat-form-field appearance="outline" class="w-320">
+        <mat-label>Airline</mat-label>
+        <mat-select [formControl]="filterForm.controls.companyName">
+          <mat-option [value]="''">All airlines</mat-option>
+          <mat-option *ngFor="let a of airlines" [value]="a.name">{{ a.name }} ({{ a.code }})</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="count">
+        Showing <b>{{ filteredFlights.length }}</b> / {{ flights.length }}
+      </div>
+    </div>
+
+    <div class="tableWrap" *ngIf="filteredFlights.length > 0">
+      <table mat-table [dataSource]="filteredFlights" class="mat-elevation-z0">
+        <ng-container matColumnDef="flightNumber">
+          <th mat-header-cell *matHeaderCellDef>Flight</th>
+          <td mat-cell *matCellDef="let f"><b>{{ f.flightNumber }}</b></td>
+        </ng-container>
+
+        <ng-container matColumnDef="companyName">
+          <th mat-header-cell *matHeaderCellDef>Airline</th>
+          <td mat-cell *matCellDef="let f">{{ f.companyName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="route">
+          <th mat-header-cell *matHeaderCellDef>Route</th>
+          <td mat-cell *matCellDef="let f">{{ f.departureAirport }} → {{ f.arrivalAirport }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="times">
+          <th mat-header-cell *matHeaderCellDef>Times</th>
+          <td mat-cell *matCellDef="let f">
+            <div class="timeCol">
+              <div>Dep: {{ f.departureTime | date:'short' }}</div>
+              <div>Arr: {{ f.arrivalTime | date:'short' }}</div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="aircraftId">
+          <th mat-header-cell *matHeaderCellDef>Aircraft</th>
+          <td mat-cell *matCellDef="let f">#{{ f.aircraftId }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <div class="empty" *ngIf="!loading && filteredFlights.length === 0">
+      No flights found for the selected airline.
+    </div>
+  </mat-card>
+</div>

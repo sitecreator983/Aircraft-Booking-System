@@ -1,0 +1,103 @@
+/* existing banner styles (as you already have) */
+.banner {
+  width: 100%;
+  background: #1976d2;
+  color: white;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+}
+
+.banner-inner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menuBtn {
+  color: white;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+}
+
+.logout {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.7);
+  background: transparent;
+  color: white;
+  cursor: pointer;
+}
+
+.logout:hover {
+  border-color: white;
+}
+
+.wrap {
+  padding: 18px 24px;
+}
+
+.card {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.loadingRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.full {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.radioRow {
+  display: flex;
+  gap: 18px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.innerCard {
+  margin-top: 14px;
+}
+
+.hint {
+  opacity: 0.8;
+  margin-top: 8px;
+}
+
+.success {
+  margin-top: 14px;
+  font-weight: 700;
+}

@@ -1,0 +1,125 @@
+.banner {
+  width: 100%;
+  background: #1976d2;
+  color: white;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+}
+
+.banner-inner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menuBtn {
+  color: white;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+}
+
+.logout {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: transparent;
+  color: white;
+  cursor: pointer;
+}
+
+.logout:hover {
+  border-color: white;
+}
+
+.wrap {
+  padding: 18px 24px;
+}
+
+.card {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 6px 0 6px;
+}
+
+.hTitle {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.hSub {
+  opacity: 0.8;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.loadingRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 6px;
+}
+
+.error {
+  color: #b00020;
+  padding: 8px 6px;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 6px;
+  flex-wrap: wrap;
+}
+
+.w-320 {
+  width: 320px;
+}
+
+.count {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.tableWrap {
+  overflow: auto;
+  padding: 0 6px 10px 6px;
+}
+
+table {
+  width: 100%;
+}
+
+.timeCol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.empty {
+  padding: 14px 6px 10px 6px;
+  opacity: 0.85;
+}
