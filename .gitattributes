@@ -1,1 +1,2 @@
 demo/**/*.java linguist-detectable=true
+demo/**/*.java linguist-language=Java
